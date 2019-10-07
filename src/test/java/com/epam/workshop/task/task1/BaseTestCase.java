@@ -8,11 +8,8 @@ import org.quartz.Trigger;
 import org.quartz.spi.JobFactory;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.context.assertj.AssertableApplicationContext;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
-import org.springframework.boot.test.context.runner.ContextConsumer;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.quartz.JobDetailFactoryBean;
@@ -36,9 +33,7 @@ public abstract class BaseTestCase {
                 .run(ctx -> {
                     Assertions.assertThat(ctx)
                             .hasSingleBean(SimpleTriggerFactoryBean.class)
-                            .hasBean("trigger")
-                            .hasSingleBean(JobDetailFactoryBean.class)
-                            .hasBean("jobDetail");
+                            .hasSingleBean(JobDetailFactoryBean.class);
 
                     final CountDownLatch latch = ctx.getBean(CountDownLatch.class);
 

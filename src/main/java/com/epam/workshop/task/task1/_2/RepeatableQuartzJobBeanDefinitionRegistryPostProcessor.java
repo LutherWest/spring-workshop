@@ -4,7 +4,6 @@ import com.epam.workshop.task.task1.MetadataReadingUtils;
 import org.quartz.Trigger;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
@@ -56,8 +55,8 @@ public class RepeatableQuartzJobBeanDefinitionRegistryPostProcessor
                                 .addPropertyValue("jobClass", beanDefinition.getBeanClassName())
                                 .getBeanDefinition();
 
-                final String jobDetailBeanName = "jobDetail";
-                BeanDefinitionReaderUtils.registerBeanDefinition(new BeanDefinitionHolder(jobDetailBeanDefinition, jobDetailBeanName), registry);
+                final String jobDetailBeanName =
+                        BeanDefinitionReaderUtils.registerWithGeneratedName(jobDetailBeanDefinition, registry);
 
                 AbstractBeanDefinition jobTriggerBeanDefinition =
                         BeanDefinitionBuilder.rootBeanDefinition(SimpleTriggerFactoryBean.class)
@@ -68,8 +67,7 @@ public class RepeatableQuartzJobBeanDefinitionRegistryPostProcessor
                                 .addPropertyReference("jobDetail", jobDetailBeanName)
                                 .getBeanDefinition();
 
-                final String jobTriggerBeanName = "trigger";
-                BeanDefinitionReaderUtils.registerBeanDefinition(new BeanDefinitionHolder(jobTriggerBeanDefinition, jobTriggerBeanName), registry);
+                BeanDefinitionReaderUtils.registerWithGeneratedName(jobTriggerBeanDefinition, registry);
             }
         }
 

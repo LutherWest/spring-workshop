@@ -2,7 +2,6 @@ package com.epam.workshop.task.task1._1;
 
 import org.quartz.Trigger;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
-import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
@@ -62,9 +61,8 @@ public class QuartzJobImportBeanDefinitionRegistrar
                                     .addPropertyValue("jobClass", beanDefinition.getBeanClassName())
                                     .getBeanDefinition();
 
-
-                    final String jobDetailBeanName = "jobDetail";
-                    BeanDefinitionReaderUtils.registerBeanDefinition(new BeanDefinitionHolder(jobDetailBeanDefinition, jobDetailBeanName), registry);
+                    final String jobDetailBeanName =
+                            BeanDefinitionReaderUtils.registerWithGeneratedName(jobDetailBeanDefinition, registry);
 
                     Assert.isAssignable(AnnotatedBeanDefinition.class, beanDefinition.getClass());
                     AnnotatedBeanDefinition bd = (AnnotatedBeanDefinition) beanDefinition;
@@ -82,8 +80,7 @@ public class QuartzJobImportBeanDefinitionRegistrar
                                     .addPropertyReference("jobDetail", jobDetailBeanName)
                                     .getBeanDefinition();
 
-                    final String jobTriggerBeanName = "trigger";
-                    BeanDefinitionReaderUtils.registerBeanDefinition(new BeanDefinitionHolder(jobTriggerBeanDefinition, jobTriggerBeanName), registry);
+                    BeanDefinitionReaderUtils.registerWithGeneratedName(jobTriggerBeanDefinition, registry);
                 });
     }
 
