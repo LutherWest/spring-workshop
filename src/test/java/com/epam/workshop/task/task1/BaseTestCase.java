@@ -3,6 +3,7 @@ package com.epam.workshop.task.task1;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.quartz.DisallowConcurrentExecution;
+import org.quartz.JobDetail;
 import org.quartz.JobExecutionContext;
 import org.quartz.Trigger;
 import org.quartz.spi.JobFactory;
@@ -33,7 +34,9 @@ public abstract class BaseTestCase {
                 .run(ctx -> {
                     Assertions.assertThat(ctx)
                             .hasSingleBean(SimpleTriggerFactoryBean.class)
-                            .hasSingleBean(JobDetailFactoryBean.class);
+                            .hasSingleBean(JobDetail.class)
+                            .hasSingleBean(JobDetailFactoryBean.class)
+                            .hasSingleBean(Trigger.class);
 
                     final CountDownLatch latch = ctx.getBean(CountDownLatch.class);
 

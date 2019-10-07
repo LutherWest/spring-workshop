@@ -44,15 +44,14 @@ public class DependsOnBeansOfTypeAnnotationBeanFactoryPostProcessor implements B
                     .ifPresent(annotation -> dependsOnBeansOfTypeHandler.accept(annotation.type(),
                             Arrays.asList(annotation.excludingNames())));
 
-            if (definition instanceof AnnotatedBeanDefinition) {
-                // scanning of method annotations
-                AnnotatedBeanDefinition beanDefinition = (AnnotatedBeanDefinition) definition;
-                Optional.ofNullable(beanDefinition.getFactoryMethodMetadata())
-                        .map(meta -> meta.getAnnotationAttributes(DependsOnBeansOfType.class.getName()))
-                        .map(AnnotationAttributes::new)
-                        .ifPresent(attrs -> dependsOnBeansOfTypeHandler.accept(attrs.getClass(TYPE_PROPERTY),
-                                Arrays.asList(attrs.getStringArray(EXCLUDE_NAME_PROPERTY))));
-            }
+            Optional.of(definition)
+                    .filter(beanDefinition -> beanDefinition instanceof AnnotatedBeanDefinition)
+                    .map(beanDefinition -> (AnnotatedBeanDefinition) beanDefinition)
+                    .map(AnnotatedBeanDefinition::getFactoryMethodMetadata)
+                    .map(meta -> meta.getAnnotationAttributes(DependsOnBeansOfType.class.getName()))
+                    .map(AnnotationAttributes::new)
+                    .ifPresent(attrs -> dependsOnBeansOfTypeHandler.accept(attrs.getClass(TYPE_PROPERTY),
+                            Arrays.asList(attrs.getStringArray(EXCLUDE_NAME_PROPERTY))));
         }
     }
 }
