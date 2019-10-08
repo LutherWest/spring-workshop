@@ -1,4 +1,4 @@
-package com.epam.workshop.task.task1._2;
+package com.epam.workshop.task.task1._1;
 
 import com.epam.workshop.task.task1.MetadataReadingUtils;
 import org.quartz.Trigger;

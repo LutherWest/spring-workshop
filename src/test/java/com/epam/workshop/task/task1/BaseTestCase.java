@@ -2,19 +2,15 @@ package com.epam.workshop.task.task1;
 
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
-import org.quartz.DisallowConcurrentExecution;
 import org.quartz.JobDetail;
-import org.quartz.JobExecutionContext;
 import org.quartz.Trigger;
 import org.quartz.spi.JobFactory;
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.quartz.JobDetailFactoryBean;
-import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 import org.springframework.scheduling.quartz.SimpleTriggerFactoryBean;
 import org.springframework.scheduling.quartz.SpringBeanJobFactory;
@@ -25,7 +21,7 @@ import java.util.concurrent.TimeUnit;
 
 public abstract class BaseTestCase {
     public final ApplicationContextRunner runner = new ApplicationContextRunner()
-            .withUserConfiguration(SchedulerConfiguration.class);
+            .withUserConfiguration(SchedulerConfiguration.class, CountDownLatchConfig.class);
 
     @Test
     public void shouldStartJobExecution() {
@@ -33,9 +29,9 @@ public abstract class BaseTestCase {
                 .withUserConfiguration(getUserConfigurations())
                 .run(ctx -> {
                     Assertions.assertThat(ctx)
-                            .hasSingleBean(SimpleTriggerFactoryBean.class)
-                            .hasSingleBean(JobDetail.class)
                             .hasSingleBean(JobDetailFactoryBean.class)
+                            .hasSingleBean(JobDetail.class)
+                            .hasSingleBean(SimpleTriggerFactoryBean.class)
                             .hasSingleBean(Trigger.class);
 
                     final CountDownLatch latch = ctx.getBean(CountDownLatch.class);
@@ -48,25 +44,16 @@ public abstract class BaseTestCase {
 
     protected abstract Class<?>[] getUserConfigurations();
 
-    @DisallowConcurrentExecution
-    public static abstract class BaseJobClass extends QuartzJobBean {
-        @Autowired
-        private CountDownLatch latch;
-
-        @Override
-        protected final void executeInternal(JobExecutionContext context) {
-            System.out.println("Hello!");
-            latch.countDown();
+    @TestConfiguration
+    public static class CountDownLatchConfig {
+        @Bean
+        public CountDownLatch latch() {
+            return new CountDownLatch(2);
         }
     }
 
     @TestConfiguration
     public static class SchedulerConfiguration {
-
-        @Bean
-        public CountDownLatch latch() {
-            return new CountDownLatch(2);
-        }
 
         @Bean
         public SchedulerFactoryBean scheduler(JobFactory jobFactory, ObjectProvider<Trigger[]> triggers) {

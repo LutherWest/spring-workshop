@@ -1,4 +1,4 @@
-package com.epam.workshop.task.task1._1;
+package com.epam.workshop.task.task1._2;
 
 import org.springframework.context.annotation.Import;
 

@@ -1,13 +1,19 @@
 package com.epam.workshop.task.task1._0_given;
 
 import com.epam.workshop.task.task1.BaseTestCase;
+import org.quartz.DisallowConcurrentExecution;
 import org.quartz.JobDetail;
+import org.quartz.JobExecutionContext;
 import org.quartz.Trigger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.quartz.JobDetailFactoryBean;
+import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.scheduling.quartz.SimpleTriggerFactoryBean;
+
+import java.util.concurrent.CountDownLatch;
 
 public class StandardConfigurationTest extends BaseTestCase {
 
@@ -41,6 +47,16 @@ public class StandardConfigurationTest extends BaseTestCase {
         }
     }
 
-    public static class JobClass extends BaseJobClass { }
+    @DisallowConcurrentExecution
+    public static class JobClass extends QuartzJobBean {
+        @Autowired
+        private CountDownLatch latch;
+
+        @Override
+        protected void executeInternal(JobExecutionContext context) {
+            System.out.println("Standard Configuration job!");
+            latch.countDown();
+        }
+    }
 
 }
