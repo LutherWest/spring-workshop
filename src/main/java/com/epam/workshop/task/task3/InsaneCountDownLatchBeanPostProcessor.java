@@ -9,9 +9,6 @@ public class InsaneCountDownLatchBeanPostProcessor implements BeanPostProcessor 
 
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-        if (bean instanceof CountDownLatch) {
-            return new CountDownLatch((int) (((CountDownLatch) bean).getCount() + 1));
-        }
-        return bean;
+
     }
 }

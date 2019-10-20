@@ -31,47 +31,7 @@ public class RepeatableQuartzJobBeanDefinitionRegistryPostProcessor
         Assert.notNull(environment, "Environment must not be null");
         Assert.notNull(resourceLoader, "ResourceLoader must not be null");
 
-        CachingMetadataReaderFactory metadataReaderFactory = new CachingMetadataReaderFactory(resourceLoader);
 
-        for (String beanDefinitionName : registry.getBeanDefinitionNames()) {
-            BeanDefinition beanDefinition = registry.getBeanDefinition(beanDefinitionName);
-
-            AnnotationMetadata annotationMetadata =
-                    MetadataReadingUtils.retrieveClassAnnotationMetadata(beanDefinition, metadataReaderFactory);
-
-            if (annotationMetadata == null) {
-                continue;
-            }
-
-            AnnotationAttributes attributes =
-                    AnnotationAttributes.fromMap(annotationMetadata.getAnnotationAttributes(RepeatableQuartzJob.class.getName()));
-
-            if (attributes != null) {
-                AbstractBeanDefinition jobDetailBeanDefinition =
-                        BeanDefinitionBuilder.rootBeanDefinition(JobDetailFactoryBean.class)
-                                .addPropertyValue("name", beanDefinition.getBeanClassName() + "JobDetail")
-                                .addPropertyValue("durability", true)
-                                .addPropertyValue("requestsRecovery", false)
-                                .addPropertyValue("jobClass", beanDefinition.getBeanClassName())
-                                .getBeanDefinition();
-
-                final String jobDetailBeanName =
-                        BeanDefinitionReaderUtils.registerWithGeneratedName(jobDetailBeanDefinition, registry);
-
-                AbstractBeanDefinition jobTriggerBeanDefinition =
-                        BeanDefinitionBuilder.rootBeanDefinition(SimpleTriggerFactoryBean.class)
-                                .addPropertyValue("name", beanDefinition.getBeanClassName() + "JobTrigger")
-                                .addPropertyValue("misfireInstruction", Trigger.MISFIRE_INSTRUCTION_SMART_POLICY)
-                                .addPropertyValue("repeatCount", -1)
-                                .addPropertyValue("repeatInterval", attributes.getNumber("repeatInterval").longValue())
-                                .addPropertyReference("jobDetail", jobDetailBeanName)
-                                .getBeanDefinition();
-
-                BeanDefinitionReaderUtils.registerWithGeneratedName(jobTriggerBeanDefinition, registry);
-            }
-        }
-
-        metadataReaderFactory.clearCache();
     }
 
     @Override

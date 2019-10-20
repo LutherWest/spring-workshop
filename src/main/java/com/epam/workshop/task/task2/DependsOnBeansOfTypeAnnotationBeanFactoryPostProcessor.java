@@ -26,32 +26,6 @@ public class DependsOnBeansOfTypeAnnotationBeanFactoryPostProcessor implements B
 
     @Override
     public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
-        for (String beanName : beanFactory.getBeanDefinitionNames()) {
-            BeanDefinition definition = beanFactory.getBeanDefinition(beanName);
 
-            BiConsumer<Class<?>, List<String>> dependsOnBeansOfTypeHandler = (type, excludeNames) ->
-                Arrays.stream(beanFactory.getBeanNamesForType(type))
-                        .filter(name -> !(excludeNames.contains(name) || beanName.equals(name)))
-                        .forEach(name -> {
-                            String[] dependencies = definition.getDependsOn();
-                            dependencies = StringUtils.addStringToArray(dependencies, name);
-                            definition.setDependsOn(dependencies);
-                        });
-
-            // try to find class level annotation
-            Optional.ofNullable(beanFactory.getType(beanName))
-                    .map(cls -> AnnotatedElementUtils.findMergedAnnotation(cls, DependsOnBeansOfType.class))
-                    .ifPresent(annotation -> dependsOnBeansOfTypeHandler.accept(annotation.type(),
-                            Arrays.asList(annotation.excludingNames())));
-
-            Optional.of(definition)
-                    .filter(beanDefinition -> beanDefinition instanceof AnnotatedBeanDefinition)
-                    .map(beanDefinition -> (AnnotatedBeanDefinition) beanDefinition)
-                    .map(AnnotatedBeanDefinition::getFactoryMethodMetadata)
-                    .map(meta -> meta.getAnnotationAttributes(DependsOnBeansOfType.class.getName()))
-                    .map(AnnotationAttributes::new)
-                    .ifPresent(attrs -> dependsOnBeansOfTypeHandler.accept(attrs.getClass(TYPE_PROPERTY),
-                            Arrays.asList(attrs.getStringArray(EXCLUDE_NAME_PROPERTY))));
-        }
     }
 }

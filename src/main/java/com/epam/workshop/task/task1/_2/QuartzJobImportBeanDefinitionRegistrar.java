@@ -34,54 +34,7 @@ public class QuartzJobImportBeanDefinitionRegistrar
         Assert.notNull(environment, "Environment must not be null");
         Assert.notNull(resourceLoader, "ResourceLoader must not be null");
 
-        ClassPathScanningCandidateComponentProvider scanner =
-                new ClassPathScanningCandidateComponentProvider(false, environment);
-        scanner.setResourceLoader(resourceLoader);
-        scanner.addIncludeFilter(new AnnotationTypeFilter(RepeatableQuartzJob.class));
 
-        String annotationName = EnableRepeatableQuartzJob.class.getName();
-        AnnotationAttributes attrs = Optional.ofNullable(metadata.getAnnotationAttributes(annotationName))
-                .map(AnnotationAttributes::new)
-                .orElseThrow(() -> new IllegalStateException(String.format("Unable to obtain annotation " +
-                        "attributes for %s!", annotationName)));
-
-        String[] packages = Optional.of(attrs.getStringArray("basePackages"))
-                .filter(array -> array.length > 0)
-                .orElseGet(() -> new String[] { ClassUtils.getPackageName(metadata.getClassName()) });
-
-        Arrays.stream(packages)
-                .map(scanner::findCandidateComponents)
-                .flatMap(Collection::stream)
-                .forEach(beanDefinition -> {
-                    AbstractBeanDefinition jobDetailBeanDefinition =
-                            BeanDefinitionBuilder.rootBeanDefinition(JobDetailFactoryBean.class)
-                                    .addPropertyValue("name", beanDefinition.getBeanClassName() + "JobDetail")
-                                    .addPropertyValue("durability", true)
-                                    .addPropertyValue("requestsRecovery", false)
-                                    .addPropertyValue("jobClass", beanDefinition.getBeanClassName())
-                                    .getBeanDefinition();
-
-                    final String jobDetailBeanName =
-                            BeanDefinitionReaderUtils.registerWithGeneratedName(jobDetailBeanDefinition, registry);
-
-                    Assert.isAssignable(AnnotatedBeanDefinition.class, beanDefinition.getClass());
-                    AnnotatedBeanDefinition bd = (AnnotatedBeanDefinition) beanDefinition;
-                    AnnotationAttributes jobAttrs = Optional.ofNullable(bd.getMetadata().getAnnotationAttributes(RepeatableQuartzJob.class.getName()))
-                            .map(AnnotationAttributes::new)
-                            .orElseThrow(() -> new IllegalStateException(String.format("Unable to obtain annotation " +
-                                    "attributes for %s!", annotationName)));
-
-                    AbstractBeanDefinition jobTriggerBeanDefinition =
-                            BeanDefinitionBuilder.rootBeanDefinition(SimpleTriggerFactoryBean.class)
-                                    .addPropertyValue("name", beanDefinition.getBeanClassName() + "JobTrigger")
-                                    .addPropertyValue("misfireInstruction", Trigger.MISFIRE_INSTRUCTION_SMART_POLICY)
-                                    .addPropertyValue("repeatCount", -1)
-                                    .addPropertyValue("repeatInterval", jobAttrs.getNumber("repeatInterval"))
-                                    .addPropertyReference("jobDetail", jobDetailBeanName)
-                                    .getBeanDefinition();
-
-                    BeanDefinitionReaderUtils.registerWithGeneratedName(jobTriggerBeanDefinition, registry);
-                });
     }
 
     @Override
