@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 
 import java.util.concurrent.CountDownLatch;
@@ -15,10 +16,11 @@ public class BeanDefinitionRegistryPostProcessorBasedConfigurationTest extends B
 
     @Override
     protected Class<?>[] getUserConfigurations() {
-        return new Class[] { Config.class, JobClass.class };
+        return new Class[] { Config.class };
     }
 
     @TestConfiguration
+    @ComponentScan
     public static class Config {
 
         @Bean
